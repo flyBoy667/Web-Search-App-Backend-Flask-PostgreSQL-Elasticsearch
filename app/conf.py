@@ -4,5 +4,5 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 app = Flask(__name__)
-api = Api(app)
+# api = Api(app)
 # db = SQLAlchemy(app)
