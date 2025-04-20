@@ -13,6 +13,8 @@ class DocType(db.Model):
         onupdate=db.func.now(),
     )
 
+    documents = db.relationship("Document", back_populates="doc_type")  # 👈 Ajout ici
+
 
 class Document(db.Model):
     __tablename__ = "document"
@@ -20,14 +22,14 @@ class Document(db.Model):
     doc_name = db.Column(db.String(200))
     doc_content = db.Column(db.String(1000))
     doc_type_id = db.Column(db.Integer, db.ForeignKey("doc_type.id"))
-    doc_type = db.relationship("DocType", backref="documents")
-    doc_format = db.Column(db.String(1000))
 
+    doc_type = db.relationship("DocType", back_populates="documents")  # 👈 Et ici
+
+    doc_format = db.Column(db.String(1000))
     doc_insert_date = db.Column(db.DateTime, default=db.func.now())
     doc_updated_date = db.Column(
         db.DateTime,
         default=db.func.now(),
         onupdate=db.func.now(),
     )
-
     doc_file_full_path = db.Column(db.String(1000))
