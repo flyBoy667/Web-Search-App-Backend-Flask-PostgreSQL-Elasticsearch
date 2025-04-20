@@ -4,17 +4,17 @@ import sqlalchemy
 from app.conf import db
 
 
-document_fields = {
-    "doc_id": fields.Integer,
-    "doc_name": fields.String,
-    "doc_content": fields.String,
-    "doc_type_id": fields.String,
-    "doc_type": fields.String,
-    "doc_format": fields.String,
-    "doc_insert_date": fields.String,
-    "doc_updated_date": fields.String,
-    "doc_file_full_path": fields.String,
-}
+# document_fields = {
+#     "doc_id": fields.Integer,
+#     "doc_name": fields.String,
+#     "doc_content": fields.String,
+#     "doc_type_id": fields.String,
+#     "doc_type": fields.String,
+#     "doc_format": fields.String,
+#     "doc_insert_date": fields.String,
+#     "doc_updated_date": fields.String,
+#     "doc_file_full_path": fields.String,
+# }
 
 document_post_args = reqparse.RequestParser()
 document_post_args.add_argument(
@@ -38,18 +38,16 @@ document_post_args.add_argument(
 
 
 class Document_ressource(Resource):
-    @marshal_with(document_fields)
     def get(self):
         documents = Document.query.all()
-        return documents, 200
+        return [doc.to_dict() for doc in documents], 200
 
-    @marshal_with(document_fields)
     def post(self):
         args = document_post_args.parse_args()
         document = Document(**args)
         db.session.add(document)
         db.session.commit()
-        return document, 201
+        return document.to_dict(), 201
 
 
 document_type_fields = {

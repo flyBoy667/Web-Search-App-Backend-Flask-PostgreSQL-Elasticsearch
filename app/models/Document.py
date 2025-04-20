@@ -15,6 +15,15 @@ class DocType(db.Model):
 
     documents = db.relationship("Document", back_populates="doc_type")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
 
 class Document(db.Model):
     __tablename__ = "document"
@@ -33,3 +42,19 @@ class Document(db.Model):
         onupdate=db.func.now(),
     )
     doc_file_full_path = db.Column(db.String(1000))
+
+    def to_dict(self):
+        return {
+            "doc_id": self.doc_id,
+            "doc_name": self.doc_name,
+            "doc_content": self.doc_content,
+            "doc_type": self.doc_type.name if self.doc_type else None,
+            "doc_format": self.doc_format,
+            "doc_insert_date": (
+                self.doc_insert_date.isoformat() if self.doc_insert_date else None
+            ),
+            "doc_updated_date": (
+                self.doc_updated_date.isoformat() if self.doc_updated_date else None
+            ),
+            "doc_file_full_path": self.doc_file_full_path,
+        }
