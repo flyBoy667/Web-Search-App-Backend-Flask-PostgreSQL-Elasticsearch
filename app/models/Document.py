@@ -6,11 +6,11 @@ class DocType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(200), nullable=False)
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(
         db.DateTime,
-        default=db.func.current_timestamp(),
-        onupdate=db.func.current_timestamp(),
+        default=db.func.now(),
+        onupdate=db.func.now(),
     )
 
 
@@ -23,11 +23,11 @@ class Document(db.Model):
     doc_type = db.relationship("DocType", backref="documents")
     doc_format = db.Column(db.String(1000))
 
-    doc_insert_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    doc_insert_date = db.Column(db.DateTime, default=db.func.now())
     doc_updated_date = db.Column(
         db.DateTime,
-        default=db.func.current_timestamp(),
-        onupdate=db.func.current_timestamp(),
+        default=db.func.now(),
+        onupdate=db.func.now(),
     )
 
     doc_file_full_path = db.Column(db.String(1000))
