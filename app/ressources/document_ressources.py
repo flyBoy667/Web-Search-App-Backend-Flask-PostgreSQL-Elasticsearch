@@ -40,7 +40,11 @@ document_post_args.add_argument(
     help="The document file full path is required",
 )
 document_post_args.add_argument(
-    "file", type=werkzeug.datastructures.FileStorage, location='files', required=True, help="Le fichier est requis"
+    "file",
+    type=werkzeug.datastructures.FileStorage,
+    location="files",
+    required=True,
+    help="Le fichier est requis",
 )
 
 
@@ -51,21 +55,21 @@ class Document_ressource(Resource):
 
     def post(self):
         args = document_post_args.parse_args()
-        file = request.files['file']
-        
+        file = request.files["file"]
+
         # Traitez le fichier ici, par exemple, en l'enregistrant
         filename = secure_filename(file.filename)
-        file.save(os.path.join('/fichiers/', filename))
-        
+        file.save(os.path.join("/fichiers/", filename))
+
         # Créez le document avec les autres arguments
         document = Document(
-            doc_name=args['doc_name'],
-            doc_content=args['doc_content'],
-            doc_type_id=args['doc_type_id'],
-            doc_format=args['doc_format'],
-            doc_file_full_path=filename
+            doc_name=args["doc_name"],
+            doc_content=args["doc_content"],
+            doc_type_id=args["doc_type_id"],
+            doc_format=args["doc_format"],
+            doc_file_full_path=filename,
         )
-        
+
         db.session.add(document)
         db.session.commit()
         return document.to_dict(), 201
@@ -82,12 +86,6 @@ document_type_fields = {
 document_type_post_args = reqparse.RequestParser()
 document_type_post_args.add_argument(
     "name", type=str, required=True, help="Le nom du type de document est requis"
-)
-document_type_post_args.add_argument(
-    "description",
-    type=str,
-    required=True,
-    help="La description du type de document est requise",
 )
 
 
