@@ -80,7 +80,7 @@ def extract_text_from_pdf(file_stream):
 
 def extract_text_from_docx(file_stream):
     try:
-        doc = DocxDocument(file_stream)
+        doc = docx(file_stream)
         return "\n".join([para.text for para in doc.paragraphs])
     except Exception as e:
         return f"[Erreur lecture DOCX] {str(e)}"
