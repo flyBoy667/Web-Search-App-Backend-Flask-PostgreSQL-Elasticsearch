@@ -129,6 +129,25 @@ class Document_list_ressource(Resource):
         return document.to_dict(), 201
 
 
+class Document_ressource(Resource):
+    def get(self, doc_id):
+        document = Document.query.get(doc_id=doc_id)
+
+        if not document:
+            return {"message": "Document not found"}, 404
+
+        return document.to_dict(), 200
+
+    def delete(self, doc_id):
+        document = Document.query.get(doc_id=doc_id)
+        if not document:
+            return {"message": "Document not found"}, 404
+
+        db.session.delete(document)
+        db.session.commit()
+        return {"message": "Document deleted successfully"}, 204
+
+
 document_type_fields = {
     "id": fields.Integer,
     "name": fields.String,
