@@ -22,22 +22,39 @@ from werkzeug.utils import secure_filename
 
 document_post_args = reqparse.RequestParser()
 document_post_args.add_argument(
-    "doc_name", type=str, required=True, help="The document name is required"
+    "doc_name",
+    type=str,
+    required=True,
+    help="The document name is required",
+    location="form",
 )
 document_post_args.add_argument(
-    "doc_content", type=str, required=True, help="The document content is required"
+    "doc_content",
+    type=str,
+    required=True,
+    help="The document content is required",
+    location="form",
 )
 document_post_args.add_argument(
-    "doc_type_id", type=int, required=True, help="The document type ID is required"
+    "doc_type_id",
+    type=int,
+    required=True,
+    help="The document type ID is required",
+    location="form",
 )
 document_post_args.add_argument(
-    "doc_format", type=str, required=True, help="The document format is required"
+    "doc_format",
+    type=str,
+    required=True,
+    help="The document format is required",
+    location="form",
 )
 document_post_args.add_argument(
     "doc_file_full_path",
     type=str,
-    required=True,
+    required=False,
     help="The document file full path is required",
+    location="form",
 )
 document_post_args.add_argument(
     "file",
@@ -55,23 +72,27 @@ class Document_ressource(Resource):
 
     def post(self):
         args = document_post_args.parse_args()
+
         file = request.files["file"]
-
-        # Traitez le fichier ici, par exemple, en l'enregistrant
         filename = secure_filename(file.filename)
-        file.save(os.path.join("/fichiers/", filename))
 
-        # Créez le document avec les autres arguments
+        UPLOAD_FOLDER = os.path.join(os.getcwd(), "fichiers")
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+
         document = Document(
             doc_name=args["doc_name"],
             doc_content=args["doc_content"],
             doc_type_id=args["doc_type_id"],
             doc_format=args["doc_format"],
-            doc_file_full_path=filename,
+            doc_file_full_path=file_path,
         )
 
         db.session.add(document)
         db.session.commit()
+
         return document.to_dict(), 201
 
 
