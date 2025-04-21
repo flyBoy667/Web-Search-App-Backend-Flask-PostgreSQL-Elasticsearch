@@ -141,7 +141,7 @@ class DocumentListRessource(Resource):
                     },
                 )
             except:
-                print(f"Failed to index document in Elasticsearch: {e}")
+                print(f"Failed to index document in Elasticsearch")
 
         return document.to_dict(), 201
 
@@ -178,24 +178,34 @@ document_type_post_args.add_argument(
 
 class DocumentSearchResource(Resource):
     def get(self):
-        query = request.args("q", "")
+        query = request.args.get(
+            "query", ""
+        ) 
 
         if not query:
             return {"message": "No search query provided"}, 400
 
-        results = es.search(
-            index="documents",
-            body={
-                "query": {
-                    "multi_match": {
-                        "query": query,
-                        "fields": ["doc_name", "doc_content", "doc_type"],
+        try:
+            results = es.search(
+                index="documents",
+                body={
+                    "query": {
+                        "multi_match": {
+                            "query": query,
+                            "fields": [
+                                "doc_name",
+                                "doc_content",
+                            ],  
+                            "fuzziness": "AUTO", 
+                        }
                     }
-                }
-            },
-        )
-        hits = results["hits"]["hits"]
-        return [hit["_source"] for hit in hits], 200
+                },
+            )
+            hits = results["hits"]["hits"]
+            return [hit["_source"] for hit in hits], 200
+        except Exception as e:
+            print(f"Elasticsearch search error: {e}")
+            return {"message": "Search failed"}, 500
 
 
 class Document_type_ressource(Resource):

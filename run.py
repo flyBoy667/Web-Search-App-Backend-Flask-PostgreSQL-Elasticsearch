@@ -10,7 +10,7 @@ from app.ressources.document_ressources import (
 api.add_resource(DocumentListRessource, "/api/document")
 api.add_resource(DocumentRessource, "/api/document/<string:doc_id>")
 api.add_resource(Document_type_ressource, "/api/document-type")
-api.add_resource(DocumentSearchResource, "/api/document-search")
+api.add_resource(DocumentSearchResource, "/api/search")
 
 
 if __name__ == "__main__":
