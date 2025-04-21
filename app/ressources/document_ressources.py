@@ -86,7 +86,7 @@ def extract_text_from_docx(file_stream):
         return f"[Erreur lecture DOCX] {str(e)}"
 
 
-class Document_ressource(Resource):
+class Document_list_ressource(Resource):
     def get(self):
         documents = Document.query.all()
         return [doc.to_dict() for doc in documents], 200
