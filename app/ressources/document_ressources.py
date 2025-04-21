@@ -1,7 +1,7 @@
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 from app.models.Document import DocType, Document
 import sqlalchemy
-from app.conf import db
+from app.conf import db, es
 from flask import request
 import werkzeug
 import os
@@ -86,7 +86,7 @@ def extract_text_from_docx(file_stream):
         return f"[Erreur lecture DOCX] {str(e)}"
 
 
-class Document_list_ressource(Resource):
+class DocumentListRessource(Resource):
     def get(self):
         documents = Document.query.all()
         return [doc.to_dict() for doc in documents], 200
@@ -126,10 +126,23 @@ class Document_list_ressource(Resource):
         db.session.add(document)
         db.session.commit()
 
+        es.index(
+            index="documents",
+            id=document.doc_id,
+            body={
+                "doc_name": document.doc_name,
+                "doc_content": document.doc_content,
+                "doc_type_id": document.doc_type_id,
+                "doc_format": document.doc_format,
+                "doc_insert_date": document.doc_insert_date.isoformat(),
+                "doc_updated_date": document.doc_updated_date.isoformat(),
+            },
+        )
+
         return document.to_dict(), 201
 
 
-class Document_ressource(Resource):
+class DocumentRessource(Resource):
     def get(self, doc_id):
         document = db.get_or_404(Document, doc_id, description="Doc not found")
 
@@ -157,6 +170,28 @@ document_type_post_args = reqparse.RequestParser()
 document_type_post_args.add_argument(
     "name", type=str, required=True, help="Le nom du type de document est requis"
 )
+
+
+class DocumentSearchResource(Resource):
+    def get(self):
+        query = request.args("q", "")
+
+        if not query:
+            return {"message": "No search query provided"}, 400
+
+        results = es.search(
+            index="documents",
+            body={
+                "query": {
+                    "multi_match": {
+                        "query": query,
+                        "fields": ["doc_name", "doc_content", "doc_type"],
+                    }
+                }
+            },
+        )
+        hits = results["hits"]["hits"]
+        return [hit["_source"] for hit in hits], 200
 
 
 class Document_type_ressource(Resource):
