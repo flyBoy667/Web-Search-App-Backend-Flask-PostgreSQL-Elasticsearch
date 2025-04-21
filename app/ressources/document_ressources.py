@@ -126,18 +126,22 @@ class DocumentListRessource(Resource):
         db.session.add(document)
         db.session.commit()
 
-        es.index(
-            index="documents",
-            id=document.doc_id,
-            body={
-                "doc_name": document.doc_name,
-                "doc_content": document.doc_content,
-                "doc_type_id": document.doc_type_id,
-                "doc_format": document.doc_format,
-                "doc_insert_date": document.doc_insert_date.isoformat(),
-                "doc_updated_date": document.doc_updated_date.isoformat(),
-            },
-        )
+        if es:
+            try:
+                es.index(
+                    index="documents",
+                    id=document.doc_id,
+                    body={
+                        "doc_name": document.doc_name,
+                        "doc_content": document.doc_content,
+                        "doc_type_id": document.doc_type_id,
+                        "doc_format": document.doc_format,
+                        "doc_insert_date": document.doc_insert_date.isoformat(),
+                        "doc_updated_date": document.doc_updated_date.isoformat(),
+                    },
+                )
+            except:
+                print(f"Failed to index document in Elasticsearch: {e}")
 
         return document.to_dict(), 201
 
