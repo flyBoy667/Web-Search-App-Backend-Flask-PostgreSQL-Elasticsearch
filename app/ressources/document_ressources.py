@@ -131,7 +131,7 @@ class Document_list_ressource(Resource):
 
 class Document_ressource(Resource):
     def get(self, doc_id):
-        document = Document.query.get(doc_id=doc_id)
+        document = db.get_or_404(Document, doc_id, description="Doc not found")
 
         if not document:
             return {"message": "Document not found"}, 404
@@ -139,10 +139,7 @@ class Document_ressource(Resource):
         return document.to_dict(), 200
 
     def delete(self, doc_id):
-        document = Document.query.get(doc_id=doc_id)
-        if not document:
-            return {"message": "Document not found"}, 404
-
+        document = db.get_or_404(Document, doc_id, description="Doc not found")
         db.session.delete(document)
         db.session.commit()
         return {"message": "Document deleted successfully"}, 204
