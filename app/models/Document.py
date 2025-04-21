@@ -28,7 +28,7 @@ class Document(db.Model):
     __tablename__ = "document"
     doc_id = db.Column(db.Integer, primary_key=True, unique=True)
     doc_name = db.Column(db.String(200))
-    doc_content = db.Column(db.String(1000))
+    doc_content = db.Column(db.String(90000))
     doc_type_id = db.Column(db.Integer, db.ForeignKey("doc_type.id"))
 
     doc_type = db.relationship("DocType", back_populates="documents")

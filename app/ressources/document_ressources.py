@@ -6,6 +6,8 @@ from flask import request
 import werkzeug
 import os
 from werkzeug.utils import secure_filename
+from docx import Document as docx
+from PyPDF2 import PdfReader
 
 
 # document_fields = {
@@ -31,7 +33,7 @@ document_post_args.add_argument(
 document_post_args.add_argument(
     "doc_content",
     type=str,
-    required=True,
+    required=False,
     help="The document content is required",
     location="form",
 )
@@ -65,6 +67,25 @@ document_post_args.add_argument(
 )
 
 
+def extract_text_from_pdf(file_stream):
+    try:
+        reader = PdfReader(file_stream)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text() or ""
+        return text
+    except Exception as e:
+        return f"[Erreur lecture PDF] {str(e)}"
+
+
+def extract_text_from_docx(file_stream):
+    try:
+        doc = DocxDocument(file_stream)
+        return "\n".join([para.text for para in doc.paragraphs])
+    except Exception as e:
+        return f"[Erreur lecture DOCX] {str(e)}"
+
+
 class Document_ressource(Resource):
     def get(self):
         documents = Document.query.all()
@@ -75,6 +96,18 @@ class Document_ressource(Resource):
 
         file = request.files["file"]
         filename = secure_filename(file.filename)
+        extension = os.path.splitext(filename)[1].lower()
+
+        if extension == ".pdf":
+            file_content = extract_text_from_pdf(file)
+        elif extension == ".docx":
+            file_content = extract_text_from_docx(file)
+        elif extension == ".doc":
+            return {
+                "message": "Le format .doc n’est pas supporté directement. Convertissez en .docx"
+            }, 400
+        else:
+            return {"message": f"Format de fichier {extension} non supporté"}, 400
 
         UPLOAD_FOLDER = os.path.join(os.getcwd(), "fichiers")
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -84,7 +117,7 @@ class Document_ressource(Resource):
 
         document = Document(
             doc_name=args["doc_name"],
-            doc_content=args["doc_content"],
+            doc_content=file_content,
             doc_type_id=args["doc_type_id"],
             doc_format=args["doc_format"],
             doc_file_full_path=file_path,
